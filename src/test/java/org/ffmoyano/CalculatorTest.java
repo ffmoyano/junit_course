@@ -2,6 +2,10 @@ package org.ffmoyano;
 
 
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.*;
+
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -52,7 +56,7 @@ class CalculatorTest {
         // Arrange
         int dividend = 4;
         int divisor = 0;
-        String expectedExceptionMessage="/ by zero";
+        String expectedExceptionMessage = "/ by zero";
         // Act
         ArithmeticException actualException = assertThrows(ArithmeticException.class, () -> {
             calculator.integerDivision(dividend, divisor);
@@ -61,11 +65,45 @@ class CalculatorTest {
         assertEquals(expectedExceptionMessage, actualException.getMessage(), "Unexpected exception message");
     }
 
-    @DisplayName("Test 33 - 1 ) 32")
-    @Test
-    void integerSubtraction() {
-        int result = calculator.integerSubtraction(33, 1);
-        assertEquals(32, result);
+    @DisplayName("Test integer substraction methodsource [minuend, subtrahend, expected]")
+    @ParameterizedTest // accepts parameters
+    @MethodSource("integerSubtractionInputParameters")
+        // method whence it will take the parameters, if the method source and this have the same name this can be left empty
+    void integerSubtractionByMethodSource(int minuend, int subtrahend, int expected) {
+        int result = calculator.integerSubtraction(minuend, subtrahend);
+        assertEquals(result, expected, () -> minuend + " - " + subtrahend + " did not produce " + expected);
     }
 
+    private static Stream<Arguments> integerSubtractionInputParameters() {
+        return Stream.of(
+                // the integerSubstraction Method will run one time for each line of Arguments.of provided here
+                Arguments.of(33, 1, 32),
+                Arguments.of(54, 1, 53),
+                Arguments.of(24, 1, 23)
+        );
+    }
+
+    @DisplayName("Test integer substraction csvsource [minuend, subtrahend, expected]")
+    @ParameterizedTest // accepts parameters
+    @CsvSource({"33,1,32", "54, 1, 53"})
+    void integerSubtractionByCsvParams(int minuend, int subtrahend, int expected) {
+        int result = calculator.integerSubtraction(minuend, subtrahend);
+        assertEquals(result, expected, () -> minuend + " - " + subtrahend + " did not produce " + expected);
+    }
+
+    @DisplayName("Test integer substraction csvfilesource [minuend, subtrahend, expected]")
+    @ParameterizedTest // accepts parameters
+    @CsvFileSource(resources = "/integerSubtraction.csv")
+    void integerSubtractionByCsvFile(int minuend, int subtrahend, int expected) {
+        int result = calculator.integerSubtraction(minuend, subtrahend);
+        assertEquals(result, expected, () -> minuend + " - " + subtrahend + " did not produce " + expected);
+    }
+
+    @ParameterizedTest
+    // it will run three times, one with each parameter provided with strings. It accepts other types
+    @ValueSource(strings = {"John", "Kate", "Alice"})
+    void valueSourceDemonstration(String firstName) {
+        System.out.println(firstName);
+        assertNotNull(firstName);
+    }
 }
